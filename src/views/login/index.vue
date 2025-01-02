@@ -15,36 +15,47 @@
       </div>
 
       <div class="form">
+        <!-- 1. 手机号码输入框 -->
         <div class="form-item">
-          <input class="inp" maxlength="11" placeholder="Enter phone number" type="text">
+          <input v-model = "mobile" class="inp" maxlength="11" placeholder="Enter phone number" type="text">
         </div>
+        <!-- 2. 图形验证码输入框 -->
         <div class="form-item">
-          <input v-model=picCode class="inp" maxlength="5" placeholder="请输入图形验证码" type="text">
+          <input v-model = "picCode" class="inp" maxlength="5" placeholder="请输入图形验证码" type="text">
           <!-- 加一个v-if，在无图形验证码地址时，不渲染此元素 -->
           <img v-if = "picUrl" :src="picUrl" alt="" @click = "getPicCode">
         </div>
+        <!-- 3. 短信验证码输入框 -->
         <div class="form-item">
-          <input class="inp" placeholder="Enter the verification code" type="text">
-          <button>Verification Code</button>
+          <input v-model = "msgCode"  class="inp" placeholder="Enter the verification code" type="text">
+          <button @click = "getCode">
+            {{ second === totalSecond ? 'Verification Code' : second + 's后重新发送' }}
+            </button>
         </div>
       </div>
 
-      <div class="login-btn">Log in</div>
+      <div class="login-btn" @click = "login">Log in</div>
     </div>
   </div>
 </template>
 
 <script>
-import { getPicCode } from '@/api/login'
+import { getMsgCode, getPicCode, codeLogin } from '@/api/login'
 
 export default {
   name: 'LoginIndex',
 
+  // 数据
   data () {
     return {
       picCode: '', // 用户输入的图形验证码
+      mobile: '',
       picKey: '', // 图形验证码唯一标识，其他请求接口要用
-      picUrl: '' // 图形验证码URL
+      picUrl: '', // 图形验证码URL
+      totalSecond: 60, // 总秒数
+      second: 60, // 当前秒数，开定时器，对此数据--
+      timer: null, // 定时器id
+      msgCode: '' // 短信验证码
     }
   },
 
@@ -62,7 +73,68 @@ export default {
       this.picKey = key
 
       // this.$toast('图形验证码获取成功')
+    },
+
+    // 校验手机号和图形验证码的合法
+    validFn () {
+      if (!/^1[3-9]\d{9}$/.test(this.mobile)) {
+        this.$toast('请输入正确的手机号')
+        return false
+      }
+      if (!/^\w{4}$/.test(this.picCode)) {
+        this.$toast('请输入正确的图形验证码')
+        return false
+      }
+      return true
+    },
+
+    // 请求短信验证码方法
+    async getCode () {
+      // 请求前先验证输入框内容
+      if (!this.validFn()) {
+        return
+      }
+
+      // 避免重复点击开启多个定时器，当前没有定时器且当前second=totalSecond，才可开启
+      if (!this.timer && this.second === this.totalSecond) {
+        // 调用请求函数
+        await getMsgCode(this.picCode, this.picKey, this.mobile)
+        this.$toast('发送成功，请注意查收')
+
+        // 开启定时器
+        this.timer = setInterval(() => {
+          this.second--
+
+          if (this.second <= 0) {
+            clearInterval(this.timer)
+            this.timer = null // reset   timer id
+            this.second = this.totalSecond
+          }
+        }, 1000)
+      }
+    },
+
+    // 登录请求
+    async login () {
+      if (!this.validFn) {
+        return
+      }
+
+      if (!/^\d{6}$/.test(this.msgCode)) {
+        this.$toast('请输入正确的手机验证码')
+        return
+      }
+      const res = await codeLogin(this.mobile, this.msgCode) // 请求登录，获得用户token信息和userId
+      this.$store.commit('user/setUserInfo', res.data) // 将用户token和userId存入vuex和本地storage
+      // console.log(res)
+      this.$toast('登录成功')
+      this.$router.push('/')
     }
+  },
+
+  // 离开页面销毁定时器
+  destroyed () {
+    clearInterval(this.timer)
   }
 }
 </script>
