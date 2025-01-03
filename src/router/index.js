@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
+// 一级路由页面
 import Layout from '@/views/layout'
 import Login from '@/views/login'
 import MyOrder from '@/views/myorder'
@@ -7,6 +9,8 @@ import Search from '@/views/search'
 import SearchList from '@/views/search/list'
 import ProDetail from '@/views/prodetail'
 import Pay from '@/views/pay'
+
+// 二级路由页面
 import Home from '@/views/layout/home'
 import Category from '@/views/layout/category'
 import Cart from '@/views/layout/cart'
