@@ -51,7 +51,6 @@ export default {
     return {
       sortType: 'all',
       sortPrice: 0,
-      categoryId: 0,
       proList: [],
       loading: true
     }
@@ -80,8 +79,8 @@ export default {
     const { data: { list } } = await getProList({
       sortType: this.sortType,
       SortPrice: 0,
-      categoryId: 0,
-      goodsName: this.$route.query.search,
+      categoryId: this.$route.query.categoryId, // 获取页面url携带的传入参数（categoryId）
+      goodsName: this.$route.query.search, // 获取页面url携带的传入参数（search），分为路由传参和查询参数，这是后者
       page: 1
     })
     this.proList = list.data

@@ -70,6 +70,7 @@ export default {
     this.searchList = pageData.items[0].params // 搜索框的placehold
     this.bannerList = pageData.items[1].data
     this.navList = pageData.items[3].data
+    // console.log(this.navList)
     this.textList = pageData.items[5].params
     this.proList = pageData.items[6].data
   }

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Toast } from 'vant' // 从vant中导入toast提示组件
 
-// 创建一个axios实例（instance）
+// 创建一个axios实例对象（instance）
 const request = axios.create({
   baseURL: 'http://smart-shop.itheima.net/index.php?s=/api',
   timeout: 5000,
@@ -10,7 +10,7 @@ const request = axios.create({
   }
 })
 
-// 自定义配置
+// 自定义配置请求，使用axios模块里面的内置方法
 // 添加请求拦截器
 request.interceptors.request.use(function (config) {
   // 发送请求前，需要提前做的事情

@@ -17,15 +17,23 @@
     <div class="list-box">
       <div class="left">
         <ul>
-          <li v-for="item in 20" :key="item">
-            <a class="active" href="javascript:;">name</a>
+          <li v-for="(item, index) in list" :key="item.catagory_id">
+            <a :class="{ active: index === activeIndex }" href="javascript:;" @click = "activeIndex = index">{{ item.name }}</a>
           </li>
         </ul>
       </div>
-      <div class="right">
-        <div v-for="item in 10" :key="item" class="cate-goods">
-          <img src="#" alt="">
-          <p>name1</p>
+      <div class="right" v-if = !loading>
+        <div v-if = "list[activeIndex]?.children && list[activeIndex]?.children.length > 0" class = "right1">
+          <!-- 避免在 list[activeIndex] 为 undefined 或 null 时尝试访问 children，从而防止运行时错误 -->
+          <!-- 什么时候不需要加？ 如果你确信 list[activeIndex] 一定存在并且永远不会是 undefined 或 null，可以不加 ?.。但在动态数据中，推荐使用它来防止潜在错误。 -->
+          <!-- 点击商品子类型，进入商品搜索列表，将商品的category_id参数传入到搜索结果列表页 -->
+          <div v-for="item in list[activeIndex]?.children" :key="item.category_id" class="cate-goods" @click="$router.push(`/searchlist?categoryId=${item.category_id}`)">
+            <img :src="item.image?.external_url" alt="">
+            <p>{{ item.name }}</p>
+          </div>
+        </div>
+        <div v-else class="nothing">
+          暂无相关产品
         </div>
       </div>
     </div>
@@ -34,8 +42,24 @@
 </template>
 
 <script>
+import { getCategoryData } from '@/api/category' // 导入用于请求商品分类的方法
+
 export default {
-  name: 'CategoryIndex'
+  name: 'CategoryIndex',
+  data () {
+    return {
+      list: [],
+      activeIndex: 0,
+      loading: true
+    }
+  },
+
+  async created () {
+    const { data: { list } } = await getCategoryData()
+    this.list = list
+    this.loading = false
+    // console.log(list)
+  }
 }
 </script>
 
@@ -69,13 +93,24 @@ export default {
     .right {
       flex: 1;
       height: 100%;
-      background-color: #ffffff;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      align-content: flex-start;
-      padding: 10px 0;
-      overflow: auto;
+      .right1 {
+        display: flex;
+        height: 100%;
+        background-color: #ffffff;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-content: flex-start;
+        padding: 10px 0;
+        overflow: auto;
+      }
+      .nothing {
+        height: 100%;
+        width: 100%;
+        text-align: center;
+        align-content: center;
+        color: gray;
+        font-size: 14px;
+      }
 
       .cate-goods {
         width: 33.3%;

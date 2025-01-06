@@ -1,5 +1,6 @@
 <template>
 <!-- 判断是否存在item数据，如果有就渲染一下内容 -->
+<!-- 配合动态路由传参数，将点击商品跳转页面时，将商品ID传入 -->
   <div v-if= "item.goods_id" class="goods-item" @click="$router.push(`/prodetail/${item.goods_id}`)">
     <div class="left">
       <img :src="item.goods_image" alt="">
