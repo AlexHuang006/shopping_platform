@@ -1,9 +1,10 @@
 import Vue from 'vue'
 
 // 引入vant组建库-按需导入
-import { Lazyload, Icon, Button, Tabbar, TabbarItem, Rate, NavBar, Toast, Search, Swipe, SwipeItem, Grid, GridItem } from 'vant'
+import { Dialog, ActionSheet, Icon, Button, Tabbar, TabbarItem, Rate, NavBar, Toast, Search, Swipe, SwipeItem, Grid, GridItem } from 'vant'
 
-Vue.use(Lazyload)
+Vue.use(Dialog)
+Vue.use(ActionSheet)
 Vue.use(Icon)
 Vue.use(Button)
 Vue.use(Tabbar)

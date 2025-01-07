@@ -2,107 +2,146 @@
   <div class="prodetail">
     <!-- 页面标题 -->
     <van-nav-bar fixed title="商品详情" left-arrow @click-left="$router.go(-1)" />
+    <div v-if = !loading>
+      <!-- 商品图片 -->
+      <van-swipe :autoplay="3000" @change="onChange">
+        <van-swipe-item v-for="(item, index) in images" :key="index">
+          <img :src="item.external_url" />
+        </van-swipe-item>
+        <!-- 轮播图指示器 -->
+        <template #indicator>
+          <div class="custom-indicator">{{ current + 1 }} / {{ images.length }}</div>
+        </template>
+      </van-swipe>
 
-    <!-- 商品图片 -->
-    <van-swipe :autoplay="3000" @change="onChange">
-      <van-swipe-item v-for="(item, index) in images" :key="index">
-        <img :src="item.external_url" />
-      </van-swipe-item>
-      <!-- 轮播图指示器 -->
-      <template #indicator>
-        <div class="custom-indicator">{{ current + 1 }} / {{ images.length }}</div>
-      </template>
-    </van-swipe>
-
-    <!-- 商品说明 -->
-    <div class="info">
-      <!-- 价格标题 -->
-      <div class="title">
-        <div class="price left">
-          <span class="now">￥{{ detail.goods_price_min }}</span>
-          <span class="oldprice">￥{{ detail.goods_price_max }}</span>
-        </div>
-        <div class="sellcount right">已售{{ detail.goods_sales }}件</div>
-      </div>
-      <!-- 商品名标题 -->
-      <div class="msg text-ellipsis-2">
-        {{ detail.goods_name }}
-      </div>
-
-      <!-- service 说明 -->
-      <div class="service">
-        <div class="left-words">
-          <span><van-icon name="passed" />七天无理由退货</span>
-          <span><van-icon name="passed" />48小时发货</span>
-        </div>
-        <div class="right-icon">
-          <van-icon name="arrow" />
-        </div>
-      </div>
-    </div>
-
-    <!-- 商品评价 -->
-    <div class="comment">
-      <div class="comment-title">
-        <div class="left">商品评价 ({{ total }}条)</div>
-        <div class="right">查看更多 <van-icon name="arrow" /> </div>
-      </div>
-      <div class="comment-list">
-        <div class="comment-item" v-for="item in commentList" :key="item.comment_id">
-          <div class="top">
-            <img :src="item.user.avatar_url" alt="">
-            <div class="name">{{ item.user.nick_name }}</div>
-            <van-rate :size="16" :value="item.score / 2" color="#ffd21e" void-icon="star" void-color="#eee"/>
+      <!-- 商品说明 -->
+      <div class="info">
+        <!-- 价格标题 -->
+        <div class="title">
+          <div class="price left">
+            <span class="now">￥{{ detail.goods_price_min }}</span>
+            <span class="oldprice">￥{{ detail.goods_price_max }}</span>
           </div>
-          <div class="content">
-            {{ item.content }}
+          <div class="sellcount right">已售{{ detail.goods_sales }}件</div>
+        </div>
+        <!-- 商品名标题 -->
+        <div class="msg text-ellipsis-2">
+          {{ detail.goods_name }}
+        </div>
+
+        <!-- service 说明 -->
+        <div class="service">
+          <div class="left-words">
+            <span><van-icon name="passed" />七天无理由退货</span>
+            <span><van-icon name="passed" />48小时发货</span>
           </div>
-          <div class="time">
-            {{ item.create_time }}
+          <div class="right-icon">
+            <van-icon name="arrow" />
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 商品描述 -->
-    <div class="desc">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/kHgx21fZMWwqirkMhawkAw.jpg" alt="">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/0rRMmncfF0kGjuK5cvLolg.jpg" alt="">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/2P04A4Jn0HKxbKYSHc17kw.jpg" alt="">
-      <img src="https://uimgproxy.suning.cn/uimg1/sop/commodity/MT4k-mPd0veQXWPPO5yTIw.jpg" alt="">
-    </div>
+      <!-- 商品评价 -->
+      <div class="comment">
+        <div class="comment-title">
+          <div class="left">商品评价 ({{ total }}条)</div>
+          <div class="right">查看更多 <van-icon name="arrow" /> </div>
+        </div>
+        <div class="comment-list">
+          <div class="comment-item" v-for="item in commentList" :key="item.comment_id">
+            <div class="top">
+              <img :src="item.user.avatar_url || defaultImg" alt="">
+              <div class="name">{{ item.user.nick_name }}</div>
+              <van-rate :size="16" :value="item.score / 2" color="#ffd21e" void-icon="star" void-color="#eee"/>
+            </div>
+            <div class="content">
+              {{ item.content }}
+            </div>
+            <div class="time">
+              {{ item.create_time }}
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <!-- 底部 -->
-    <div class="footer">
-      <div class="icon-home">
-        <van-icon name="wap-home-o" />
-        <span>首页</span>
+      <!-- 商品描述 -->
+      <div class="desc" v-html = "detail.content">
       </div>
-      <div class="icon-cart">
-        <van-icon name="shopping-cart-o" />
-        <span>购物车</span>
+
+      <!-- 底部 -->
+      <div class="footer">
+        <div class="icon-home">
+          <van-icon name="wap-home-o" />
+          <span>Home</span>
+        </div>
+        <div class="icon-cart">
+          <van-icon name="shopping-cart-o" />
+          <span>Cart</span>
+        </div>
+        <div @click = "addFn" class="btn-add">Add to cart</div>
+        <div @click = "buyFn" class="btn-buy">Buy now</div>
       </div>
-      <div class="btn-add">加入购物车</div>
-      <div class="btn-buy">立刻购买</div>
+
+      <!-- 购物车弹层 -->
+      <van-action-sheet v-model = "showPanel" :title = "model === 'cart' ? 'Add to cart' : 'Buy now'">
+        <div class="product">
+          <div class="product-title">
+            <div class="left">
+              <img :src="detail.goods_image" alt="">
+            </div>
+            <div class="right">
+              <div class="price">
+                <span>¥</span>
+                <span class="nowprice">{{ detail.goods_price_min }}</span>
+                <span class="oldprice">¥ {{ detail.goods_price_max }}</span>
+              </div>
+              <div class="count" v-if = "detail.stock_total === 0">
+                <span>库存</span>
+                <span>{{ detail.stock_total }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="num-box">
+            <span>Qty</span>
+            <!-- 3. 使用通用子组件CountBox -->
+            <!-- v-model绑定组件，因为v-model包含value和@input，并将父组件的value数据传递给子组件CountBox -->
+            <!-- 将父组件的proStock数据传递给子组件CountBox -->
+            <CountBox v-model = "addCount" :proStock = "detail.stock_total"></CountBox>
+          </div>
+          <div class="showbtn" v-if="detail.stock_total > 0">
+            <!-- determine whether user has already signed in? -->
+            <div class="btn" v-if="model === 'cart'" @click = "addCart">Add to cart</div>
+            <div class="btn now" v-else>Buy now</div>
+          </div>
+          <div class="btn-none" v-else>Sold out</div>
+        </div>
+      </van-action-sheet>
     </div>
   </div>
 </template>
 
 <script>
 import { getProDetail, getProComments } from '@/api/product'
+import defaultImg from '@/assets/default-avatar.png'
+import CountBox from '@/components/CountBox.vue' // 1. 引入子组件CountBox
 
 export default {
   name: 'ProDetailIndex',
+  components: {
+    CountBox // 2. 注册组组件CountBox
+  },
   data () {
     return {
       current: 0,
-      images: [
-        'https://img01.yzcdn.cn/vant/apple-1.jpg',
-        'https://img01.yzcdn.cn/vant/apple-2.jpg'
-      ],
+      images: [],
       detail: [],
       total: 0,
-      commentList: []
+      commentList: [],
+      defaultImg,
+      loading: true,
+      showPanel: false,
+      model: 'cart',
+      addCount: 1
     }
   },
 
@@ -137,7 +176,46 @@ export default {
       const { data: { list, total } } = await getProComments(this.goodsId, 3)
       this.commentList = list
       this.total = total
+      this.loading = false
       // console.log(list)
+    },
+
+    // determine which popup should be open
+    addFn () {
+      this.model = 'cart'
+      this.showPanel = true
+    },
+
+    // determine which popup should be open
+    buyFn () {
+      this.model = 'butNow'
+      this.showPanel = true
+    },
+
+    // function of determining whether user has signed in
+    async addCart () {
+      // 从全局的vuex里面拿到存进去的用户token数据
+      if (!this.$store.getters.token) { // if user hasn't signed in, it would pop up to prompt user
+        this.$dialog.confirm({
+          title: '温馨提示',
+          message: '请先登录',
+          confirmButtonText: '去登录',
+          cancelButtonText: '再逛逛'
+        })
+
+          .then(() => { // then 回调会调用路由导航方法 this.$router.replace。使用 query 参数将当前页面路径（this.$route.fullPath）传递给登录页，这样用户登录完成后可以跳回原页面。
+            this.$router.replace({
+              path: '/login',
+              query: {
+                backUrl: this.$route.fullPath
+              }
+            })
+          })
+          .catch(() => {}) // catch 回调，则什么也不做
+        return
+      }
+      // 如何用户已登录。。。
+      console.log('cart')
     }
   }
 }
@@ -230,6 +308,11 @@ export default {
     .comment-item {
       font-size: 16px;
       line-height: 30px;
+      .content {
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       .top {
         height: 30px;
         display: flex;
@@ -288,5 +371,59 @@ export default {
 
   .tips {
     padding: 10px;
+  }
+
+  .product {
+    .product-title {
+      display: flex;
+      .left {
+        img {
+          width: 90px;
+          height: 90px;
+        }
+        margin: 10px;
+      }
+      .right {
+        flex: 1;
+        padding: 10px;
+        .price {
+          font-size: 14px;
+          color: #fe560a;
+          .nowprice {
+            font-size: 24px;
+            margin: 0 5px;
+          }
+          .oldprice {
+            display: block;
+            color: #959595;
+            font-size: 16px;
+            text-decoration: line-through;
+          }
+        }
+      }
+    }
+
+    .num-box {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      align-items: center;
+    }
+
+    .btn, .btn-none {
+      height: 40px;
+      line-height: 40px;
+      margin: 20px;
+      border-radius: 20px;
+      text-align: center;
+      color: rgb(255, 255, 255);
+      background-color: rgb(255, 148, 2);
+    }
+    .btn.now {
+      background-color: #fe5630;
+    }
+    .btn-none {
+      background-color: #cccccc;
+    }
   }
 </style>

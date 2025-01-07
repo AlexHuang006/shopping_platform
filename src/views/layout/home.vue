@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home" v-if = !loading>
     <!-- 导航条 -->
     <van-nav-bar title="Smart Mall" fixed />
 
@@ -58,7 +58,8 @@ export default {
       bannerList: [],
       navList: [],
       textList: [],
-      proList: []
+      proList: [],
+      loading: true
     }
   },
   components: {
@@ -73,6 +74,7 @@ export default {
     // console.log(this.navList)
     this.textList = pageData.items[5].params
     this.proList = pageData.items[6].data
+    this.loading = false
   }
 }
 </script>
