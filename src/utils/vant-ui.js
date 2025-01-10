@@ -1,8 +1,9 @@
 import Vue from 'vue'
 
 // 引入vant组建库-按需导入
-import { Dialog, ActionSheet, Icon, Button, Tabbar, TabbarItem, Rate, NavBar, Toast, Search, Swipe, SwipeItem, Grid, GridItem } from 'vant'
+import { Checkbox, Dialog, ActionSheet, Icon, Button, Tabbar, TabbarItem, Rate, NavBar, Toast, Search, Swipe, SwipeItem, Grid, GridItem } from 'vant'
 
+Vue.use(Checkbox)
 Vue.use(Dialog)
 Vue.use(ActionSheet)
 Vue.use(Icon)

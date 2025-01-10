@@ -71,14 +71,18 @@
       <!-- 底部 -->
       <div class="footer">
         <div class="icon-home">
-          <van-icon name="wap-home-o" />
+          <van-icon name="wap-home-o" @click = "$router.push('/home')"/>
           <span>Home</span>
         </div>
         <div class="icon-cart">
+          <!-- 添加购物车显示商品数量角标的图标，且有商品时，显示此图标-->
+          <span v-if = "cartTotal > 0" class="num">{{ cartTotal }}</span>
           <van-icon name="shopping-cart-o" />
           <span>Cart</span>
         </div>
+        <!-- 点击‘Add to cart’按钮，打开购物车弹窗 -->
         <div @click = "addFn" class="btn-add">Add to cart</div>
+        <!-- 点击‘Buy now’按钮，打开立即购买的购物车弹窗 -->
         <div @click = "buyFn" class="btn-buy">Buy now</div>
       </div>
 
@@ -124,6 +128,7 @@
 import { getProDetail, getProComments } from '@/api/product'
 import defaultImg from '@/assets/default-avatar.png'
 import CountBox from '@/components/CountBox.vue' // 1. 引入子组件CountBox
+import { addCart } from '@/api/cart' // 引入‘加入购物车’方法
 
 export default {
   name: 'ProDetailIndex',
@@ -132,16 +137,17 @@ export default {
   },
   data () {
     return {
-      current: 0,
-      images: [],
-      detail: [],
-      total: 0,
-      commentList: [],
-      defaultImg,
-      loading: true,
-      showPanel: false,
-      model: 'cart',
-      addCount: 1
+      current: 0, // 用于配合轮播图indicator数标
+      images: [], // 用于储存轮播图图片数据
+      detail: [], // 商品详情信息
+      total: 0, // 此商品的评论总数量
+      commentList: [], // 评论内容列表
+      defaultImg, // 评论中用户默认头像图片
+      loading: true, // 配合页面数据加载
+      showPanel: false, // 配合购物车弹窗
+      model: 'cart', // 配合显示购物车弹窗的模式
+      addCount: 1, // 购买此商品的数量
+      cartTotal: 0 // 购物车内的商品数量
     }
   },
 
@@ -192,18 +198,20 @@ export default {
       this.showPanel = true
     },
 
-    // function of determining whether user has signed in
+    // 添加到购物车方法
     async addCart () {
       // 从全局的vuex里面拿到存进去的用户token数据
-      if (!this.$store.getters.token) { // if user hasn't signed in, it would pop up to prompt user
+      // 1. 如果用户未登录
+      if (!this.$store.getters.token) { // if user hasn't signed in, it would pop up to prompt user,因为在用户登录时，已将token存入vuex和local storage，所以判断是否存有token即可
         this.$dialog.confirm({
           title: '温馨提示',
           message: '请先登录',
           confirmButtonText: '去登录',
           cancelButtonText: '再逛逛'
         })
-
-          .then(() => { // then 回调会调用路由导航方法 this.$router.replace。使用 query 参数将当前页面路径（this.$route.fullPath）传递给登录页，这样用户登录完成后可以跳回原页面。
+          .then(() => { // 点击‘登录’则调用then 回调会调用路由导航方法 this.$router.replace。使用 query 参数将当前页面路径（this.$route.fullPath）传递给登录页，这样用户登录完成后可以跳回原页面。
+            // 登录流程完成后，需要回到原来的页面，则在跳转时，需要将将当前路径地址作为携带参数
+            // 并且login in页面的登录js逻辑代码也需要配合进行修改，login in页面在登录请求完成后需要判断地址栏是否有回跳地址，有就回原页面，无就默认到app首页
             this.$router.replace({
               path: '/login',
               query: {
@@ -214,8 +222,12 @@ export default {
           .catch(() => {}) // catch 回调，则什么也不做
         return
       }
-      // 如何用户已登录。。。
-      console.log('cart')
+      // 2. 已登录用户，则将商品添加到购物车中
+      const { data } = await addCart(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
+      this.cartTotal = data.cartTotal
+      this.$toast('添加成功')
+      this.showPanel = false
+      // console.log(data)
     }
   }
 }
@@ -350,6 +362,22 @@ export default {
         font-size: 14px;
         .van-icon {
           font-size: 24px;
+        }
+      }
+      .icon-cart {
+        position: relative;
+        padding: 0 6px;
+        .num {
+          z-index: 999;
+          position: absolute;
+          top: -2px;
+          right: 0;
+          min-width: 16px;
+          padding: 0 4px;
+          color: #fff;
+          text-align: center;
+          background-color: #ee0a24;
+          border-radius: 50%;
         }
       }
       .btn-add,

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Toast } from 'vant' // 从vant中导入toast提示组件
+import store from '@/store'
 
 // 创建一个axios实例对象（instance）
 const request = axios.create({
@@ -21,6 +22,12 @@ request.interceptors.request.use(function (config) {
     loadingType: 'spinner', // 样式
     duration: 0 // toast的持续时间，0为一直持续
   })
+
+  // 在请求拦截器中添加统一headers参数：token
+  const token = store.getters.token // 从vuex中拿到token数据
+  if (token) {
+    config.headers['Access-Token'] = token
+  }
   return config
 }, function (error) {
   // 对请求发送错误时做的事情

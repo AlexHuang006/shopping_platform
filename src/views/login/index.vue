@@ -128,7 +128,12 @@ export default {
       this.$store.commit('user/setUserInfo', res.data) // 将用户token和userId存入vuex和本地storage
       // console.log(res)
       this.$toast('登录成功')
-      this.$router.push('/')
+
+      // 此处需要判断，用户是从什么业务进入登录流程的，如果从购物车等业务进入，登录完成后需要返回原页面，即判断地址栏是否有回跳地址。如果就只是正常的登录，则登录成功后默认打开app首页。
+      // 判断是否有回跳地址
+      const url = this.$route.query.backUrl || '/' // 从当前页面地址栏中获取数据
+      // this.$router.push('/')
+      this.$router.replace(url) // 此处将push换成replace是为了用户体验，避免返回原页面
     }
   },
 
