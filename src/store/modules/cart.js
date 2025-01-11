@@ -5,26 +5,62 @@ export default {
   namespaced: true,
   state () {
     return {
-      cartList: [] // 用于存储购物车的商品列表数据
+      cartList: [] // 用于存储购物车的商品列表数据，在组件中使用辅助函数mapstate并在computed（计算属性）中拿到此列表数据
     }
   },
   mutations: {
     setCartList (state, newList) {
       state.cartList = newList // 用于定义同步的方法来更新状态。这里的 setCartList 将新的购物车数据直接赋值给 cartList。
+    },
+
+    toggleCheck (state, goodsId) { // 此方法用于将选中的购物车中的商品的选中状态取反
+      const goods = state.cartList.find(item => item.goods_id === goodsId) // 先根据页面传过来的商品ID找到对应的数据
+      goods.isChecked = !goods.isChecked // 将对应商品ID的isChecked状态取反，达到选中or未选中的效果
+    },
+
+    // 配合页面中的“全选”按钮2
+    toggleAllCheck (state, flag) {
+      state.cartList.forEach(item => {
+        item.isChecked = flag
+      })
     }
   },
   actions: { // 在组件中调用 dispatch 来触发 actions 中的代码。
     // 这里的 getCartAction 从服务器获取购物车数据，处理后通过 commit 调用 Mutation 来更新状态。
-    async getCartList (context) { // 在 Vuex 的 actions 中，形参 context 是一个常规的命名，它表示了 dispatch 或 commit 方法的上下文环境。通过 context，你可以访问 Vuex 的 state 和 getters，并可以使用 commit 提交 mutation 或 dispatch 触发其他 action。
+    async getCartAction (context) { // 在 Vuex 的 actions 中，形参 context 是一个常规的命名，它表示了 dispatch 或 commit 方法的上下文环境。通过 context，你可以访问 Vuex 的 state 和 getters，并可以使用 commit 提交 mutation 或 dispatch 触发其他 action。
       const { data } = await getCartList()
       data.list.forEach(item => {
-        item.isChecked = true // 为了当进入购物车页面时，选中全部商品
+        item.isChecked = true // 给数据中每一项添加复选框选中状态的数据，为了当进入购物车页面时，选中全部商品
       })
       console.log(data)
-      context.commit('setCartList', data.list)
+      context.commit('setCartList', data.list) // 使用 commit 提交 mutation
     }
   },
-  getters: {}
+  getters: { // 提供数据的计算属性,然后在组件页面里，使用mapGetters辅助函数使用
+    // 购物车中所有商品的累加总数
+    cartTotal (state) {
+      return state.cartList.reduce((sum, item) => sum + item.goods_num, 0)
+    },
+    // 购物车中被选中的商品列表
+    selCartList (state) {
+      return state.cartList.filter(item => item.isChecked)
+    },
+    // 选中商品的总数
+    selCount (state, getters) {
+      return getters.selCartList.reduce((sum, item) => sum + item.goods_num, 0)
+    },
+    // 选中商品的总价
+    selPrice (state, getters) {
+      return getters.selCartList.reduce((sum, item) => {
+        return sum + item.goods_num * item.goods.goods_price_min
+      }, 0).toFixed(2)
+    },
+
+    // 配合页面中的“全选”按钮1
+    isAllChecked (state) {
+      return state.cartList.every(item => item.isChecked) // 表示cartList中isChecked的每一项都为true时，return结果为true
+    }
+  }
 }
 
 // 1. export default

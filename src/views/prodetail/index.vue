@@ -45,7 +45,7 @@
       <div class="comment">
         <div class="comment-title">
           <div class="left">商品评价 ({{ total }}条)</div>
-          <div class="right">查看更多 <van-icon name="arrow" /> </div>
+          <div class="right" v-if = "total > 0">查看更多 <van-icon name="arrow" /> </div>
         </div>
         <div class="comment-list">
           <div class="comment-item" v-for="item in commentList" :key="item.comment_id">
@@ -105,7 +105,8 @@
               </div>
             </div>
           </div>
-          <div class="num-box">
+          <!-- 库存大于0时，选择显示组件 -->
+          <div class="num-box" v-if = "detail.stock_total > 0">
             <span>Qty</span>
             <!-- 3. 使用通用子组件CountBox -->
             <!-- v-model绑定组件，因为v-model包含value和@input，并将父组件的value数据传递给子组件CountBox -->

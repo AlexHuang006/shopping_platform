@@ -1,7 +1,9 @@
 <template>
   <div class="count-box">
+    <!-- value等于1时，商品数量不能再减 -->
     <button @click = "handleSub" :class="{ minus: true, active: value === 1 }">-</button>
     <input :value = "value" @change="handleChange" type="text" class="inp">
+    <!-- value等于库存数时，商品数量不能再加 -->
     <button @click = "handleAdd" :class="{ add: true, active: value === proStock }">+</button>
   </div>
 </template>
@@ -51,7 +53,7 @@ export default {
 
 <style lang = "less" scoped>
   .count-box {
-    width: 130px;
+    width: 110px;
     display: flex;
     .add, .minus {
       width: 30px;
@@ -61,7 +63,7 @@ export default {
       background-color: #efefef;
     }
     .inp {
-      width: 60px;
+      width: 40px;
       height: 30px;
       outline: none;
       border: none;
