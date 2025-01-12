@@ -1,12 +1,19 @@
 <template>
-  <div class="cart">
+  <!-- 用户已登录并购物车内有商品 -->
+  <div class="cart" v-if = "isLogin && cartList.length > 0">
     <van-nav-bar title="购物车" fixed />
     <!-- 购物车开头 -->
     <div class="cart-title">
       <span class="all">共<i>{{ cartTotal || 0 }}</i>件商品</span>
-      <span class="edit">
-        <van-icon name="edit" />
-        编辑
+      <!-- 注册点击事件，修改状态 -->
+      <span class="edit" @click = "isEdit = !isEdit">
+        <span v-if = "!isEdit">
+          <van-icon name="edit" />
+          编辑
+        </span>
+        <span v-else class="isedit">
+          完成
+        </span>
       </span>
     </div>
 
@@ -22,14 +29,16 @@
           <span class="tit text-ellipsis-2">{{ item.goods.goods_name }}</span>
           <span class="bottom">
             <div class="price">¥ <span>{{ item.goods.goods_price_min }}</span></div>
-            <CountBox :value = "item.goods_num"></CountBox>
+            <!-- 在CountBox中，1.将商品数量从父传给子组件通过：value；2. 父组件定义了修改数据方法input，子组件通过$emit('input')，将子组件中的数据传给父 -->
+            <!-- 另外，因为changeCount既要传value的值也要传父组件内的值，所以此处写成箭头函数的形式 -->
+            <CountBox :value = "item.goods_num" @input = "value => changeCount(item.goods_id, value, item.goods_sku_id)" :proStock = "item.goods.stock_total"></CountBox>
           </span>
         </div>
       </div>
     </div>
 
-    <div class="footer-fixed" @click = "toggleAllCheck">
-      <div  class="all-check">
+    <div class="footer-fixed">
+      <div  class="all-check" @click = "toggleAllCheck">
         <!-- 当购物车中的数据都是选中时，即数据中的isChecked都是true，则value设置为true即表示选中状态 -->
         <van-checkbox :value = "isAllChecked" icon-size="18"></van-checkbox>
         全选
@@ -41,19 +50,34 @@
           <span>合计：</span>
           <span>¥ <i class="totalPrice">{{ selPrice }}</i></span>
         </div>
-        <div v-if="true" class="goPay" :class="{disabled: selCount === 0}">结算({{ selCount }})</div>
-        <div v-else class="delete" :class="{disabled: carCount === 0}">删除</div>
+        <!-- 底下按钮根据编辑状态变化 -->
+        <div v-if="!isEdit" class="goPay" :class="{disabled: selCount === 0}">结算({{ selCount }})</div>
+        <div v-else class="delete" :class="{disabled: selCount === 0}" @click = "handleDel">删除</div>
       </div>
     </div>
+  </div>
+  <!-- 空购物车处理 -->
+  <div class="empty-cart" v-else>
+    <van-nav-bar title="购物车" fixed />
+    <img src="@/assets/empty.png" alt="">
+    <div class="tips">
+      您的购物车是空的, 快去逛逛吧
+    </div>
+    <div class="btn" @click="$router.push('/')">去逛逛</div>
   </div>
 </template>
 
 <script>
 import CountBox from '@/components/CountBox.vue'
 import { mapState, mapGetters } from 'vuex' // 先引入vuex中的辅助函数，为了从vuex中拿到数据
-import { changeCount } from '@/api/cart'
 export default {
   name: 'CartIndex',
+
+  data () {
+    return {
+      isEdit: false // 配合购物车模块的编辑模式的切换
+    }
+  },
 
   components: { // 注册子组件
     CountBox
@@ -83,10 +107,31 @@ export default {
       this.$store.commit('cart/toggleAllCheck', !this.isAllChecked) // 因为isAllChecked=true或false。所以将此值通过commit方法传回vuex的cart模块中，用于切换全选按钮的状态
     },
 
-    // 更新购物车商品数据
-    async changeCount () {
-      const res = await changeCount()
-      console.log(res)
+    // 此方法，将goodsId, goodsNum, goodsSkuId传给vuex的cart模块，用于更新购物车商品列表数据
+    changeCount (goodsId, value, goodsSkuId) {
+      this.$store.dispatch('cart/changeCountAction', {
+        goodsId,
+        goodsNum: value,
+        goodsSkuId
+      })
+    },
+
+    // 删除购物车商品
+    handleDel () {
+      if (this.selCount === 0) return
+      this.$store.dispatch('cart/delSelect')
+      this.isEdit = false
+    }
+  },
+
+  // 监视编辑状态，动态控制复选框状态
+  watch: {
+    isEdit (value) {
+      if (value) {
+        this.$store.commit('cart/toggleAllCheck', false)
+      } else {
+        this.$store.commit('cart/toggleAllCheck', true)
+      }
     }
   }
 }
@@ -117,6 +162,9 @@ export default {
       .edit {
         .van-icon {
           font-size: 18px;
+        }
+        .isedit {
+          color: #fa2f21;
         }
       }
     }
@@ -224,6 +272,31 @@ export default {
           background-color: #ff9779;
         }
       }
+    }
+  }
+  .empty-cart {
+    padding: 80px 30px;
+    img {
+      width: 140px;
+      height: 92px;
+      display: block;
+      margin: 0 auto;
+    }
+    .tips {
+      text-align: center;
+      color: #666;
+      margin: 30px;
+    }
+    .btn {
+      width: 110px;
+      height: 32px;
+      line-height: 32px;
+      text-align: center;
+      background-color: #fa2c20;
+      border-radius: 16px;
+      color: #fff;
+      display: block;
+      margin: 0 auto;
     }
   }
 </style>

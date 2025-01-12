@@ -33,6 +33,7 @@ export default {
         return
       }
       this.$emit('input', this.value + 1)
+      // console.log(this.proStock)
     },
 
     handleChange (e) { // 用于判断input输入框内的内容合法
@@ -41,6 +42,12 @@ export default {
 
       // 输入了不合法的文本 或 输入了负值，回退成原来的 value 值
       if (isNaN(num) || num < 1) {
+        e.target.value = this.value
+        return
+      }
+
+      if (num > this.proStock) {
+        this.$toast('很抱歉，该商品库存数量不足')
         e.target.value = this.value
         return
       }

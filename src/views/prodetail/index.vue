@@ -70,13 +70,13 @@
 
       <!-- 底部 -->
       <div class="footer">
-        <div class="icon-home">
-          <van-icon name="wap-home-o" @click = "$router.push('/home')"/>
+        <div class="icon-home"  @click = "$router.push('/home')">
+          <van-icon name="wap-home-o"/>
           <span>Home</span>
         </div>
-        <div class="icon-cart">
+        <div class="icon-cart" @click = "$router.push('/cart')">
           <!-- 添加购物车显示商品数量角标的图标，且有商品时，显示此图标-->
-          <span v-if = "cartTotal > 0" class="num">{{ cartTotal }}</span>
+          <span v-if = "cartTotal > 0" class="num">{{ cartTotal > 99 ? '99+' : cartTotal  }}</span>
           <van-icon name="shopping-cart-o" />
           <span>Cart</span>
         </div>
@@ -130,6 +130,7 @@ import { getProDetail, getProComments } from '@/api/product'
 import defaultImg from '@/assets/default-avatar.png'
 import CountBox from '@/components/CountBox.vue' // 1. 引入子组件CountBox
 import { addCart } from '@/api/cart' // 引入‘加入购物车’方法
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'ProDetailIndex',
@@ -147,21 +148,26 @@ export default {
       loading: true, // 配合页面数据加载
       showPanel: false, // 配合购物车弹窗
       model: 'cart', // 配合显示购物车弹窗的模式
-      addCount: 1, // 购买此商品的数量
-      cartTotal: 0 // 购物车内的商品数量
+      addCount: 1 // 购买此商品的数量
     }
   },
 
   computed: {
     goodsId () { // define一个获取页面路径中传入参数的方法
       return this.$route.params.id // 这是动态路由参数，获取参数
-    }
+    },
+
+    ...mapGetters('cart', ['cartTotal']) // 使用辅助函数从vuex中的cart模块中使用cartList的计算属性
   },
 
   created () {
     // 因为此页面中，在进入created生命周期时，需要请求多个后台数据，所以将请求方法写入到methods中。
     this.getDetail()
     this.getComments()
+
+    if (this.$store.getters.token) {
+      this.$store.dispatch('cart/getCartAction') // 在组件的方法中调用 dispatch， dispatch 触发actions中的异步方法，获取数据购物车数据
+    }
   },
 
   methods: {
@@ -224,8 +230,10 @@ export default {
         return
       }
       // 2. 已登录用户，则将商品添加到购物车中
-      const { data } = await addCart(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
-      this.cartTotal = data.cartTotal
+      await addCart(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
+      // const { data } = await addCart(this.goodsId, this.addCount, this.detail.skuList[0].goods_sku_id)
+      // this.cartTotal = data.cartTotal
+      this.$store.dispatch('cart/getCartAction')
       this.$toast('添加成功')
       this.showPanel = false
       // console.log(data)
@@ -368,17 +376,20 @@ export default {
       .icon-cart {
         position: relative;
         padding: 0 6px;
+        /* background-color: pink; */
         .num {
           z-index: 999;
           position: absolute;
-          top: -2px;
-          right: 0;
-          min-width: 16px;
-          padding: 0 4px;
+          width: 25px;
+          top: -3px;
+          right: -10px;
+          /* min-width: 16px; */
+          padding: 3px;
           color: #fff;
           text-align: center;
           background-color: #ee0a24;
-          border-radius: 50%;
+          border-radius: 10px;
+          font-size: 10px;
         }
       }
       .btn-add,
