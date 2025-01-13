@@ -2,7 +2,7 @@
   <div>
     <div class="category">
     <!-- 分类 -->
-    <van-nav-bar title="全部分类" fixed />
+    <van-nav-bar title="All Categories" fixed />
 
     <!-- 搜索框 -->
     <van-search

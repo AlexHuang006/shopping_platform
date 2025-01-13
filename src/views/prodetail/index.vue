@@ -116,7 +116,7 @@
           <div class="showbtn" v-if="detail.stock_total > 0">
             <!-- determine whether user has already signed in? -->
             <div class="btn" v-if="model === 'cart'" @click = "addCart">Add to cart</div>
-            <div class="btn now" v-else>Buy now</div>
+            <div class="btn now" v-else @click = "goBuyNow">Buy now</div>
           </div>
           <div class="btn-none" v-else>Sold out</div>
         </div>
@@ -131,9 +131,11 @@ import defaultImg from '@/assets/default-avatar.png'
 import CountBox from '@/components/CountBox.vue' // 1. 引入子组件CountBox
 import { addCart } from '@/api/cart' // 引入‘加入购物车’方法
 import { mapGetters } from 'vuex'
+import loginConfirm from '@/mixins/loginConfirm'
 
 export default {
   name: 'ProDetailIndex',
+  mixins: [loginConfirm],
   components: {
     CountBox // 2. 注册组组件CountBox
   },
@@ -208,25 +210,8 @@ export default {
     // 添加到购物车方法
     async addCart () {
       // 从全局的vuex里面拿到存进去的用户token数据
-      // 1. 如果用户未登录
-      if (!this.$store.getters.token) { // if user hasn't signed in, it would pop up to prompt user,因为在用户登录时，已将token存入vuex和local storage，所以判断是否存有token即可
-        this.$dialog.confirm({
-          title: '温馨提示',
-          message: '请先登录',
-          confirmButtonText: '去登录',
-          cancelButtonText: '再逛逛'
-        })
-          .then(() => { // 点击‘登录’则调用then 回调会调用路由导航方法 this.$router.replace。使用 query 参数将当前页面路径（this.$route.fullPath）传递给登录页，这样用户登录完成后可以跳回原页面。
-            // 登录流程完成后，需要回到原来的页面，则在跳转时，需要将将当前路径地址作为携带参数
-            // 并且login in页面的登录js逻辑代码也需要配合进行修改，login in页面在登录请求完成后需要判断地址栏是否有回跳地址，有就回原页面，无就默认到app首页
-            this.$router.replace({
-              path: '/login',
-              query: {
-                backUrl: this.$route.fullPath
-              }
-            })
-          })
-          .catch(() => {}) // catch 回调，则什么也不做
+      // 1. 如果用户未登录,则弹窗引导用户登录
+      if (this.loginConfirm()) {
         return
       }
       // 2. 已登录用户，则将商品添加到购物车中
@@ -237,6 +222,23 @@ export default {
       this.$toast('添加成功')
       this.showPanel = false
       // console.log(data)
+    },
+
+    // 订单结算BuyNow
+    goBuyNow () {
+      // 判断用户是否登录
+      if (this.loginConfirm()) {
+        return
+      }
+      this.$router.push({
+        path: '/pay',
+        query: {
+          mode: 'buyNow',
+          goodsId: this.goodsId,
+          goodsSkuId: this.detail.skuList[0].goods_sku_id,
+          goodsNum: this.addCount
+        }
+      })
     }
   }
 }

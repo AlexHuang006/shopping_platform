@@ -1,7 +1,7 @@
 <template>
   <!-- 用户已登录并购物车内有商品 -->
   <div class="cart" v-if = "isLogin && cartList.length > 0">
-    <van-nav-bar title="购物车" fixed />
+    <van-nav-bar title="Cart" fixed />
     <!-- 购物车开头 -->
     <div class="cart-title">
       <span class="all">共<i>{{ cartTotal || 0 }}</i>件商品</span>
@@ -12,6 +12,7 @@
           编辑
         </span>
         <span v-else class="isedit">
+          <van-icon name="delete-o" />
           完成
         </span>
       </span>
@@ -41,29 +42,29 @@
       <div  class="all-check" @click = "toggleAllCheck">
         <!-- 当购物车中的数据都是选中时，即数据中的isChecked都是true，则value设置为true即表示选中状态 -->
         <van-checkbox :value = "isAllChecked" icon-size="18"></van-checkbox>
-        全选
+        All
       </div>
 
       <!-- 需要在购物车中展示已选中商品的全部价格和全部数量。在vuex的cart模块中的getters中封装计算属性，因为数据都在vuex的cart模块中 -->
       <div class="all-total">
         <div class="price">
-          <span>合计：</span>
+          <span>Total </span>
           <span>¥ <i class="totalPrice">{{ selPrice }}</i></span>
         </div>
         <!-- 底下按钮根据编辑状态变化 -->
-        <div v-if="!isEdit" class="goPay" :class="{disabled: selCount === 0}">结算({{ selCount }})</div>
-        <div v-else class="delete" :class="{disabled: selCount === 0}" @click = "handleDel">删除</div>
+        <div v-if="!isEdit" class="goPay" :class="{disabled: selCount === 0}" @click = 'goPay'>Check out({{ selCount }})</div>
+        <div v-else class="delete" :class="{disabled: selCount === 0}" @click = "handleDel">Delete</div>
       </div>
     </div>
   </div>
   <!-- 空购物车处理 -->
   <div class="empty-cart" v-else>
-    <van-nav-bar title="购物车" fixed />
+    <van-nav-bar title="Cart" fixed />
     <img src="@/assets/empty.png" alt="">
     <div class="tips">
-      您的购物车是空的, 快去逛逛吧
+      Your Shopping Cart is empty
     </div>
-    <div class="btn" @click="$router.push('/')">去逛逛</div>
+    <div class="btn" @click="$router.push('/')">Start shopping</div>
   </div>
 </template>
 
@@ -118,9 +119,32 @@ export default {
 
     // 删除购物车商品
     handleDel () {
-      if (this.selCount === 0) return
-      this.$store.dispatch('cart/delSelect')
-      this.isEdit = false
+      this.$dialog.confirm({
+        title: '温馨提示',
+        message: '确定删除吗',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      })
+        .then(() => {
+          if (this.selCount === 0) return
+          this.$store.dispatch('cart/delSelect')
+          this.isEdit = false
+        })
+        .catch(() => {})
+    },
+
+    // 订单结算
+    goPay () {
+      if (this.selCount > 0) {
+        this.$router.push({
+          path: '/pay',
+          query: {
+            mode: 'cart',
+            cartIds: this.selCartList.map(item => item.id).join(',')
+          }
+        })
+        // console.log(1)
+      }
     }
   },
 
@@ -261,7 +285,7 @@ export default {
       }
 
       .goPay, .delete {
-        min-width: 100px;
+        min-width: 120px;
         height: 36px;
         line-height: 36px;
         text-align: center;
@@ -275,7 +299,7 @@ export default {
     }
   }
   .empty-cart {
-    padding: 80px 30px;
+    padding: 220px 30px;
     img {
       width: 140px;
       height: 92px;
@@ -288,7 +312,7 @@ export default {
       margin: 30px;
     }
     .btn {
-      width: 110px;
+      width: 140px;
       height: 32px;
       line-height: 32px;
       text-align: center;
