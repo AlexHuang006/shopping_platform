@@ -13,3 +13,15 @@ export const checkOrder = (mode, obj) => {
     }
   })
 }
+
+// 提交/支付订单
+export const submitOrder = (mode, obj) => {
+  return request.post('/checkout/submit', {
+    mode,
+    delivery: 10,
+    couponId: 0,
+    isUsePoints: 0,
+    payType: 10,
+    ...obj
+  })
+}

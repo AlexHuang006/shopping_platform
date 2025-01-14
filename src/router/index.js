@@ -9,6 +9,7 @@ import Search from '@/views/search'
 import SearchList from '@/views/search/list'
 import ProDetail from '@/views/prodetail'
 import Pay from '@/views/pay'
+import Address from '@/views/address'
 
 // 二级路由页面
 import Home from '@/views/layout/home'
@@ -40,7 +41,8 @@ const router = new VueRouter({
     { path: '/searchlist', component: SearchList },
     // 动态路由传参，商品ID
     { path: '/prodetail/:id', component: ProDetail },
-    { path: '/pay', component: Pay }
+    { path: '/pay', component: Pay },
+    { path: '/address', component: Address }
   ]
 })
 

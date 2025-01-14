@@ -1,5 +1,5 @@
 <template>
-  <div class="pay">
+  <div class="pay" v-if = loading>
     <van-nav-bar fixed title="确认订单" left-arrow @click-left="$router.go(-1)" />
 
     <!-- 地址相关 -->
@@ -11,20 +11,20 @@
 
       <div class="info" v-if="defaultAddress.address_id">
         <div class="info-content">
-          <span class="name">{{ defaultAddress.name}}</span>
-          <span class="mobile">{{ defaultAddress.phone}}</span>
+          <span class="name">{{ defaultAddress.name }}</span>
+          <span class="mobile">{{ defaultAddress.phone }}</span>
         </div>
         <div class="info-address">
           {{ longAddress }}
         </div>
       </div>
-
-      <div class="info" v-else>
-        请选择配送地址
-      </div>
-
-      <div class="right-icon">
-        <van-icon name="arrow" />
+      <div class="empty" v-else @click = "$router.push('/address')">
+        <div class="info">
+          请选择配送地址
+        </div>
+        <div class="right-icon">
+          <van-icon name="arrow" />
+        </div>
       </div>
     </div>
 
@@ -82,30 +82,32 @@
 
       <!-- 买家留言 -->
       <div class="buytips">
-        <textarea placeholder="选填：买家留言（50字内）" name="" id="" cols="30" rows="10"></textarea>
+        <textarea v-model="remark" placeholder="选填：买家留言（50字内）" name="" id="" cols="30" rows="10"></textarea>
       </div>
     </div>
 
     <!-- 底部提交 -->
     <div class="footer-fixed">
       <div class="left">实付款：<span>￥{{ order.orderTotalPrice }}</span></div>
-      <div class="tipsbtn">提交订单</div>
+      <div class="tipsbtn" @click = "submitOrder">提交订单</div>
     </div>
   </div>
 </template>
 
 <script>
 import { getAddressList } from '@/api/address' // 引入获取用户收货地址方法
-import { checkOrder } from '@/api/order'
+import { checkOrder, submitOrder } from '@/api/order'
 
 export default {
   name: 'PayIndex',
 
   data () {
     return {
-      addressList: [], // 存放用户收获地址
+      addressList: [], // 存放用户收货地址
       order: {}, // 存放订单结算信息
-      personal: {} // 存放用户信息
+      personal: {}, // 存放用户信息
+      remark: '', // 留言
+      loading: false
     }
   },
 
@@ -145,6 +147,11 @@ export default {
     async getAddressList () {
       const { data: { list } } = await getAddressList()
       this.addressList = list
+      // if (list.length > 0) {
+      //   this.addressList = list
+      // } else {
+      //   this.addressList = [{ address_id: 123, name: 'alex', phone: '13734890934', detail: '中南大学111号', region: { province: '湖南省', city: '长沙市', region: '雨花区' } }]
+      // }
     },
 
     // 订单结算
@@ -159,6 +166,20 @@ export default {
         this.order = order
         this.personal = personal
       }
+      this.loading = true
+    },
+
+    // 提交支付订单
+    async submitOrder () {
+      if (this.mode === 'cart') {
+        const res = await submitOrder(this.mode, { cartIds: this.cartIds, remark: this.remark })
+        console.log(res)
+      } else if (this.mode === 'buyNow') {
+        const res = await submitOrder(this.mode, { goodsId: this.goodsId, goodsSkuId: this.goodsSkuId, goodsNum: this.goodsNum, remark: this.remark })
+        console.log(res)
+      }
+      this.$toast.success('支付成功')
+      this.$router.replace('/myorder')
     }
   },
 
@@ -189,6 +210,10 @@ export default {
     position: relative;
     background: url(@/assets/border-line.png) bottom repeat-x;
     background-size: 60px auto;
+    .empty {
+      width: 100%;
+      // background-color: pink;
+    }
     .left-icon {
       margin-right: 20px;
     }

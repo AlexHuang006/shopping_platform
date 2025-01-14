@@ -41,6 +41,7 @@
 
 <script>
 import { getMsgCode, getPicCode, codeLogin } from '@/api/login'
+import { getAddressList, setAddress } from '@/api/address'
 
 export default {
   name: 'LoginIndex',
@@ -126,6 +127,12 @@ export default {
       }
       const res = await codeLogin(this.mobile, this.msgCode) // 请求登录，获得用户token信息和userId
       this.$store.commit('user/setUserInfo', res.data) // 将用户token和userId存入vuex和本地storage
+      // 测试使用，给新用户自动添加收货地址
+      const { data: { list } } = await getAddressList()
+      // console.log(list)
+      if (list.length === 0) {
+        await setAddress()
+      }
       // console.log(res)
       this.$toast('登录成功')
 

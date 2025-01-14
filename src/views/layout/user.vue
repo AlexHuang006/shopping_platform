@@ -1,6 +1,6 @@
 <template>
   <div class="user">
-    <div class="head-page">
+    <div class="head-page" v-if="this.$store.getters.token">
       <div class="head-img">
         <img src="@/assets/default-avatar.png" alt="" />
       </div>
@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="head-page" @click="$router.push('/login')">
+    <div class="head-page" @click="$router.push('/login')" v-else>
       <div class="head-img">
         <img src="@/assets/default-avatar.png" alt="" />
       </div>
@@ -67,7 +67,7 @@
     <div class="service">
       <div class="title">我的服务</div>
       <div class="content">
-        <div class="content-item">
+        <div class="content-item" @click = "$router.push('/address')">
           <van-icon name="records" />
           <span>收货地址</span>
         </div>
@@ -94,15 +94,17 @@
       </div>
     </div>
 
-    <div class="logout-btn">
+    <div class="logout-btn" @click = "logOutConfirm" v-if="this.$store.getters.token">
      <button>退出登录</button>
     </div>
   </div>
 </template>
 
 <script>
+import logOutConfirm from '@/mixins/loginConfirm'
 export default {
-  name: 'UserIndex'
+  name: 'UserIndex',
+  mixins: [logOutConfirm]
 }
 </script>
 
@@ -115,7 +117,7 @@ export default {
 
   .head-page {
     height: 130px;
-    background: url("http://cba.itlike.com/public/mweb/static/background/user-header2.png");
+    /* background: url("http://cba.itlike.com/public/mweb/static/background/user-header2.png"); */
     background-size: cover;
     display: flex;
     align-items: center;

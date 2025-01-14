@@ -1,5 +1,6 @@
 // 使用mixins，建立一个公共的方法
-
+import { removeInfo } from '@/utils/storage'
+import { Toast } from 'vant'
 // 判断登录弹窗
 export default {
   methods: {
@@ -28,6 +29,24 @@ export default {
         return true
       }
       return false
+    },
+
+    // 登出确认
+    logOutConfirm () {
+      if (this.$store.getters.token) {
+        this.$dialog.confirm({
+          title: '温馨提示',
+          message: '确定退出登录吗',
+          confirmButtonText: '确定',
+          cancelButtonText: '取消'
+        })
+          .then(() => {
+            removeInfo()
+            Toast('登出成功')
+            window.location.reload()
+          })
+          .catch(() => {})
+      }
     }
   }
 }
