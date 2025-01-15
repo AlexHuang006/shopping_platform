@@ -5,7 +5,7 @@
         <img src="@/assets/default-avatar.png" alt="" />
       </div>
       <div class="info">
-        <div class="mobile">123</div>
+        <div class="mobile">{{ userInfo.mobile }}</div>
         <div class="vip">
           <van-icon name="diamond-o" />
           普通会员
@@ -26,11 +26,11 @@
     <div class="my-asset">
       <div class="asset-left">
         <div class="asset-left-item">
-          <span>0</span>
+          <span>{{ userInfo.balance || 0 }}</span>
           <span>账户余额</span>
         </div>
         <div class="asset-left-item">
-          <span>0</span>
+          <span>{{ userInfo.points || 0 }}</span>
           <span>积分</span>
         </div>
         <div class="asset-left-item">
@@ -102,9 +102,32 @@
 
 <script>
 import logOutConfirm from '@/mixins/loginConfirm'
+import { getUserInfo } from '@/api/user'
+
 export default {
   name: 'UserIndex',
-  mixins: [logOutConfirm]
+  mixins: [logOutConfirm],
+
+  data () {
+    return {
+      userInfo: []
+    }
+  },
+
+  methods: {
+    async getUserInfo () {
+      if (!this.$store.getters.token) {
+        return
+      }
+      const { data: { userInfo } } = await getUserInfo()
+      this.userInfo = userInfo
+      this.loading = true
+    }
+  },
+
+  created () {
+    this.getUserInfo()
+  }
 }
 </script>
 
