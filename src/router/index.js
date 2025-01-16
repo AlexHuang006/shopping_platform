@@ -2,22 +2,31 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 // 一级路由页面
-import Layout from '@/views/layout'
-import Login from '@/views/login'
-import MyOrder from '@/views/myorder'
-import Search from '@/views/search'
-import SearchList from '@/views/search/list'
-import ProDetail from '@/views/prodetail'
-import Pay from '@/views/pay'
-import Address from '@/views/address'
+// import Layout from '@/views/layout'
+// import Login from '@/views/login'
+// import MyOrder from '@/views/myorder'
+// import Search from '@/views/search'
+// import SearchList from '@/views/search/list'
+// import ProDetail from '@/views/prodetail'
+// import Pay from '@/views/pay'
+// import Address from '@/views/address'
 
 // 二级路由页面
+import Layout from '@/views/layout'
 import Home from '@/views/layout/home'
 import Category from '@/views/layout/category'
 import Cart from '@/views/layout/cart'
 import User from '@/views/layout/user'
 
 import store from '@/store'
+
+const Login = () => import('@/views/login')
+const MyOrder = () => import('@/views/myorder')
+const Search = () => import('@/views/search')
+const SearchList = () => import('@/views/search/list')
+const ProDetail = () => import('@/views/prodetail')
+const Pay = () => import('@/views/pay')
+const Address = () => import('@/views/address')
 
 Vue.use(VueRouter)
 
